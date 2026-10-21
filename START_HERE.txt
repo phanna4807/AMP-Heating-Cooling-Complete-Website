@@ -1,0 +1,25 @@
+AMP HEATING & COOLING — READY TO ACTIVATE EMAILS
+=================================================
+
+AMP receiving email: ampservice586@gmail.com (already added)
+
+1. Open the folder in VS Code and preview index.html with Live Server.
+2. Upload ALL files inside this folder to the ROOT of your GitHub repository
+   (including the whole assets/ folder; do not upload another enclosing folder).
+3. Visit https://phanna4807.github.io/AMP-Heating-Cooling/request.html
+   after GitHub Pages finishes building.
+4. Submit a TEST request using a second email address you control.
+   Do not use actual customer information for the test.
+5. Check ampservice586@gmail.com inbox AND spam for the FormSubmit activation email.
+   Open the activation email and approve/confirm the form delivery.
+6. Submit a SECOND test. Complete CAPTCHA if requested.
+7. Verify both emails arrived: (a) AMP receives the service request and
+   (b) the customer test inbox receives AMP's automatic confirmation.
+8. Only after both work should you announce that email requests are live.
+
+Forms do NOT confirm appointments. Real AI chatbot and employee dashboard are
+separate future features. FormSubmit is a third-party processor; read its privacy
+policy and review suitability before collecting real customer information.
+
+Never add your Gmail password or API key to the public website.
+Read START_EMAIL_SETUP.txt for details.

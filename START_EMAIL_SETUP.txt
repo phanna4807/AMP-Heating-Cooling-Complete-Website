@@ -1,0 +1,61 @@
+AMP HEATING & COOLING — EMAIL AUTOMATION VERSION
+=================================================
+
+This package includes all existing pages, a new thank-you.html page, and
+service request form updates. It runs on GitHub Pages and in VS Code Live Server.
+
+WHAT IT DOES AFTER CONFIGURATION
+--------------------------------
+1. The customer fills out a service request on Home, Request Service, or Contact.
+2. Their browser sends a normal POST to FormSubmit.co (third-party form service).
+3. FormSubmit emails AMP the request details.
+4. FormSubmit sends an automatic confirmation email to the customer's email.
+5. The customer is redirected to thank-you.html when supported.
+
+IMPORTANT: An email confirms receipt ONLY, not an appointment or technician dispatch.
+This integration does NOT create bookings, save a private AMP database, or run live AI.
+The on-site chat remains a demo FAQ assistant.
+
+YOUR ONE-TIME SETUP
+-------------------
+The business recipient is already configured as ampservice586@gmail.com.
+1. Upload ALL files and assets/ to the ROOT of your GitHub repository. Do not
+   place the whole package inside an extra subfolder. Do not upload the ZIP itself.
+2. Open the published website and submit a test using a SECOND email inbox
+   you control. Keep actual customer data OUT of testing.
+3. FormSubmit will send ampservice586@gmail.com an activation email. Open it
+   and confirm/activate delivery. Check spam if needed. The first test is for
+   activation and may NOT produce a delivered service request or customer reply.
+4. Submit a second test and complete FormSubmit's CAPTCHA when prompted.
+5. Check that ampservice586@gmail.com receives the request AND the test customer
+   inbox receives an automatic receipt confirmation. If either is missing,
+   do NOT claim that email delivery is live.
+6. Test from the real GitHub Pages link before accepting actual requests.
+7. If desired, after activation switch to FormSubmit's invisible-email token
+   (which you get with activation) to reduce address harvesting.
+
+The business Gmail inbox must remain accessible for activation and notifications.
+
+The provider's documentation says _autoresponse requires the customer's email,
+native form POST (not AJAX), and enabled reCAPTCHA. Do NOT switch to AJAX or add
+"_captcha=false". See https://formsubmit.co/documentation.
+
+PRIVACY & SECURITY
+------------------
+- FormSubmit is a third-party service that will process customer contact details.
+  Review its policies and suitability before going live with real customers.
+- Your business email address can be visible in publicly served JS. Once the
+  provider confirms your email, you can replace the email with its invisible-email
+  token in AMP_FORM_RECIPIENT to reduce harvesting.
+- Never put email passwords, API keys, or private tokens into this public site.
+- The CAPTCHA should remain enabled to reduce spam.
+- Service form says it is NOT an appointment confirmation. Customers should call
+  AMP at (224) 276-1821 for urgent issues.
+- You control the site code; this package contains NO installed server backend.
+
+This package has the AMP email configured. Real email delivery is NOT verified
+until FormSubmit is activated and a second full test succeeds.
+
+References:
+https://formsubmit.co/documentation
+https://formsubmit.co/
