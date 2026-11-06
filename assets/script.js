@@ -2,354 +2,369 @@
 /*
  AMP HEATING & COOLING
  Website Service Request System
-
- Website: https://www.7-amp.com
+ Provider: Web3Forms
  Phone: (630) 380-1017
  Email: ampservice586@gmail.com
-
- Form Provider: Web3Forms
 */
 
-// =====================================
-// BUSINESS SETTINGS
-// =====================================
+(() => {
+  "use strict";
 
-const AMP_EMAIL = "ampservice586@gmail.com";
+  // BUSINESS SETTINGS
 
-const AMP_PHONE = "(630) 380-1017";
+  const ACCESS_KEY =
+    "b53d4ad3-5fc3-40a4-91cc-e14b24d29dcb";
 
-const AMP_PHONE_LINK = "6303801017";
+  const ENDPOINT =
+    "https://api.web3forms.com/submit";
 
-// Your Web3Forms Access Key
-const AMP_ACCESS_KEY =
-  "b53d4ad3-5fc3-40a4-91cc-e14b24d29dcb";
+  const EMAIL = "ampservice586@gmail.com";
 
-// Web3Forms API
-const AMP_FORM_ENDPOINT =
-  "https://api.web3forms.com/submit";
+  const PHONE = "(630) 380-1017";
 
+  const PHONE_LINK = "6303801017";
 
-// =====================================
-// MOBILE NAVIGATION
-// =====================================
+  // MOBILE MENU
 
-const menuToggle =
-  document.querySelector(".menu-toggle");
+  const menuToggle =
+    document.querySelector(".menu-toggle");
 
-menuToggle?.addEventListener("click", () => {
+  menuToggle?.addEventListener("click", () => {
+    const nav = document.querySelector(".nav");
 
-  const nav = document.querySelector(".nav");
+    if (!nav) return;
 
-  if (!nav) return;
+    const open = nav.classList.toggle("open");
 
-  const isOpen = nav.classList.toggle("open");
-
-  menuToggle.setAttribute(
-    "aria-expanded",
-    String(isOpen)
-  );
-
-});
-
-
-// =====================================
-// DISPLAY FORM MESSAGES
-// =====================================
-
-function showFormMessage(form, message, success) {
-
-  let alertBox = form.querySelector(".alert");
-
-  if (!alertBox) {
-    alertBox = document.createElement("div");
-    alertBox.className = "alert";
-    alertBox.setAttribute("role", "status");
-    alertBox.setAttribute("aria-live", "polite");
-    form.prepend(alertBox);
-  }
-
-  alertBox.style.display = "block";
-
-  alertBox.style.padding = "14px";
-
-  alertBox.style.marginBottom = "15px";
-
-  alertBox.style.borderRadius = "8px";
-
-  alertBox.style.backgroundColor = success
-    ? "#e8f8ee"
-    : "#fff0f0";
-
-  alertBox.style.color = success
-    ? "#146c35"
-    : "#a12323";
-
-  alertBox.textContent = message;
-
-  alertBox.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
+    menuToggle.setAttribute(
+      "aria-expanded",
+      String(open)
+    );
   });
 
-}
+  // DISPLAY SUCCESS OR ERROR MESSAGE
 
+  function showStatus(form, message, success) {
+    let status = form.querySelector(".alert");
 
-// =====================================
-// ADD BACKUP EMAIL OPTION
-// =====================================
+    if (!status) {
+      status = document.createElement("div");
+      status.className = "alert";
+      form.prepend(status);
+    }
 
-function addBackupEmail(form) {
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
 
-  if (form.querySelector(".amp-backup-email")) {
-    return;
+    status.style.display = "block";
+    status.style.padding = "14px";
+    status.style.margin = "0 0 16px";
+    status.style.borderRadius = "8px";
+
+    status.style.background = success
+      ? "#e9f7ed"
+      : "#fff0f0";
+
+    status.style.color = success
+      ? "#145b2e"
+      : "#9b2323";
+
+    status.textContent = message;
+
+    status.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
   }
 
-  const wrapper = document.createElement("p");
+  // ADD HIDDEN FIELDS
 
-  wrapper.className =
-    "form-note amp-backup-email";
+  function addHidden(form, name, value) {
+    let field = form.querySelector(
+      `input[type="hidden"][name="${name}"]`
+    );
 
-  wrapper.style.marginTop = "15px";
+    if (!field) {
+      field = document.createElement("input");
+      field.type = "hidden";
+      field.name = name;
+      form.prepend(field);
+    }
 
-  const text = document.createElement("span");
+    field.value = value;
+  }
 
-  text.textContent =
-    "Having trouble submitting your request? ";
+  // BACKUP EMAIL OPTION
 
-  const link = document.createElement("a");
+  function addEmailBackup(form) {
+    if (form.querySelector(".amp-email-backup")) {
+      return;
+    }
 
-  link.textContent = "Email AMP directly";
+    const text = document.createElement("p");
+    text.className = "form-note amp-email-backup";
 
-  link.href = "mailto:" + AMP_EMAIL;
+    const link = document.createElement("a");
 
-  link.style.fontWeight = "bold";
+    link.textContent = "Email your request instead";
+    link.href = `mailto:${EMAIL}`;
 
-  wrapper.append(text, link);
+    link.addEventListener("click", () => {
+      const data = new FormData(form);
 
-  form.appendChild(wrapper);
+      const body = [
+        "AMP Heating & Cooling - Service Request",
+        ""
+      ];
 
-}
+      const keys = [
+        "name",
+        "phone",
+        "email",
+        "city",
+        "service",
+        "message"
+      ];
 
+      for (const key of keys) {
+        body.push(
+          `${key.toUpperCase()}: ` +
+          String(data.get(key) || "")
+        );
+      }
 
-// =====================================
-// CONFIGURE SERVICE REQUEST FORMS
-// =====================================
+      link.href =
+        `mailto:${EMAIL}` +
+        `?subject=${encodeURIComponent(
+          "AMP Service Request"
+        )}` +
+        `&body=${encodeURIComponent(
+          body.join("\n")
+        )}`;
+    });
 
-const serviceForms =
+    text.append(
+      "If the form cannot be sent, ",
+      link,
+      ". You must press Send in your email app."
+    );
+
+    form.appendChild(text);
+  }
+
+  // SET UP ALL SERVICE REQUEST FORMS
+
   document.querySelectorAll(
     "form[data-service-form]"
-  );
+  ).forEach(form => {
 
-serviceForms.forEach(form => {
+    // REPLACE FORMSUBMIT WITH WEB3FORMS
 
-  const submitButton = form.querySelector(
-    'button[type="submit"]'
-  );
+    form.action = ENDPOINT;
+    form.method = "POST";
 
-  const formNote = form.querySelector(
-    ".form-note"
-  );
+    addHidden(
+      form,
+      "access_key",
+      ACCESS_KEY
+    );
 
-  // Replace the old FormSubmit destination
-  form.action = AMP_FORM_ENDPOINT;
+    addHidden(
+      form,
+      "subject",
+      "New AMP Heating & Cooling Service Request"
+    );
 
-  form.method = "POST";
+    addHidden(
+      form,
+      "from_name",
+      "AMP Heating & Cooling Website"
+    );
 
-  if (submitButton) {
-    submitButton.textContent =
-      "Send Service Request →";
-  }
+    const button = form.querySelector(
+      'button[type="submit"]'
+    );
 
-  if (formNote) {
-    formNote.innerHTML =
-      "After submitting your request, " +
-      "AMP will contact you to discuss scheduling. " +
-      "Submitting this form does not confirm " +
-      "an appointment. For urgent service, call " +
-      '<a href="tel:' + AMP_PHONE_LINK + '">' +
-      AMP_PHONE +
-      "</a>.";
-  }
+    const note = form.querySelector(
+      ".form-note"
+    );
 
-  addBackupEmail(form);
-
-
-  // ===================================
-  // SEND REQUEST TO WEB3FORMS
-  // ===================================
-
-  form.addEventListener("submit", async event => {
-
-    event.preventDefault();
-
-    if (!form.reportValidity()) {
-      return;
+    if (button) {
+      button.textContent =
+        "Send Service Request →";
     }
 
-    if (submitButton?.disabled) {
-      return;
+    if (note) {
+      note.textContent =
+        "Submitting a request does not " +
+        "confirm an appointment. " +
+        "For urgent service, call ";
+
+      const call = document.createElement("a");
+      call.href = `tel:${PHONE_LINK}`;
+      call.textContent = PHONE;
+
+      note.append(call, ".");
     }
 
-    const formData = new FormData(form);
+    addEmailBackup(form);
 
-    // Existing spam-trap field
-    const honey = String(
-      formData.get("_honey") || ""
-    ).trim();
+    // SUBMIT REQUEST USING WEB3FORMS
 
-    if (honey) {
-      showFormMessage(
-        form,
-        "Unable to process this request.",
-        false
-      );
-      return;
-    }
+    form.addEventListener(
+      "submit",
+      async event => {
 
-    // Read the customer's details
-    const requestData = {
+        // Prevent old FormSubmit navigation
+        event.preventDefault();
 
-      access_key: AMP_ACCESS_KEY,
-
-      subject:
-        "NEW AMP Heating & Cooling Service Request",
-
-      from_name:
-        "AMP Heating & Cooling Website",
-
-      name: String(
-        formData.get("name") || ""
-      ).trim(),
-
-      phone: String(
-        formData.get("phone") || ""
-      ).trim(),
-
-      email: String(
-        formData.get("email") || ""
-      ).trim(),
-
-      city: String(
-        formData.get("city") || ""
-      ).trim(),
-
-      service: String(
-        formData.get("service") || ""
-      ).trim(),
-
-      message: String(
-        formData.get("message") || ""
-      ).trim(),
-
-      consent: formData.get("consent") === "yes"
-        ? "Yes"
-        : "No",
-
-      source:
-        "AMP Heating & Cooling Website"
-
-    };
-
-    const originalButtonText =
-      submitButton?.textContent ||
-      "Send Service Request";
-
-    if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.textContent =
-        "Sending Request...";
-    }
-
-    try {
-
-      const response = await fetch(
-        AMP_FORM_ENDPOINT,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-
-          body: JSON.stringify(requestData)
+        if (!form.reportValidity()) {
+          return;
         }
-      );
 
-      const result = await response.json();
+        if (form.dataset.sending === "yes") {
+          return;
+        }
 
-      // =================================
-      // SUCCESS
-      // =================================
+        const fields = new FormData(form);
 
-      if (response.ok && result.success === true) {
+        // Existing spam protection
+        const honey = String(
+          fields.get("_honey") || ""
+        ).trim();
 
-        showFormMessage(
-          form,
-          "Thank you! Your service request " +
-          "has been submitted successfully. " +
-          "AMP Heating & Cooling will review " +
-          "your information and contact you " +
-          "about scheduling.",
-          true
-        );
+        if (honey) {
+          return;
+        }
 
-        // Clear the form only on success
-        form.reset();
+        // CUSTOMER INFORMATION
 
-      } else {
+        const data = {
+          access_key: ACCESS_KEY,
 
-        // =================================
-        // WEB3FORMS REPORTED AN ERROR
-        // =================================
+          subject:
+            "New AMP Heating & Cooling Service Request",
 
-        showFormMessage(
-          form,
-          "Your request could not be submitted. " +
-          "Please try again or call AMP at " +
-          AMP_PHONE + ". " +
-          (result.message || ""),
-          false
-        );
+          from_name:
+            "AMP Heating & Cooling Website",
 
+          name: String(
+            fields.get("name") || ""
+          ).trim(),
+
+          phone: String(
+            fields.get("phone") || ""
+          ).trim(),
+
+          email: String(
+            fields.get("email") || ""
+          ).trim(),
+
+          city: String(
+            fields.get("city") || ""
+          ).trim(),
+
+          service: String(
+            fields.get("service") || ""
+          ).trim(),
+
+          message: String(
+            fields.get("message") || ""
+          ).trim(),
+
+          consent: fields.get("consent")
+            ? "Yes"
+            : "No"
+        };
+
+        // DISABLE BUTTON WHILE SENDING
+
+        form.dataset.sending = "yes";
+
+        if (button) {
+          button.disabled = true;
+          button.textContent = "Sending...";
+        }
+
+        try {
+          const response = await fetch(
+            ENDPOINT,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+              },
+
+              body: JSON.stringify(data)
+            }
+          );
+
+          const result = await response.json();
+
+          // SUCCESS
+
+          if (
+            response.ok &&
+            result.success === true
+          ) {
+            showStatus(
+              form,
+              "Your service request was accepted! " +
+              "AMP Heating & Cooling will contact " +
+              "you about scheduling. " +
+              "This is not an appointment confirmation.",
+              true
+            );
+
+            form.reset();
+
+          } else {
+
+            // PROVIDER ERROR
+
+            showStatus(
+              form,
+              "Your request was not sent. " +
+              (result.message || "Please try again.") +
+              " You can also call " + PHONE + ".",
+              false
+            );
+          }
+
+        } catch (error) {
+
+          // CONNECTION ERROR
+
+          console.error(
+            "AMP Web3Forms error:",
+            error
+          );
+
+          showStatus(
+            form,
+            "The request could not be sent. " +
+            "Please try again, email " +
+            EMAIL +
+            ", or call " + PHONE + ".",
+            false
+          );
+
+        } finally {
+
+          form.dataset.sending = "no";
+
+          if (button) {
+            button.disabled = false;
+            button.textContent =
+              "Send Service Request →";
+          }
+        }
       }
-
-    } catch (error) {
-
-      // ===================================
-      // NETWORK OR CONNECTION ERROR
-      // ===================================
-
-      console.error(
-        "AMP service request error:",
-        error
-      );
-
-      showFormMessage(
-        form,
-        "We could not connect to the form service. " +
-        "Your request has NOT been confirmed. " +
-        "Please try again, email " +
-        AMP_EMAIL +
-        ", or call " +
-        AMP_PHONE + ".",
-        false
-      );
-
-    } finally {
-
-      // Restore the submit button
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent =
-          originalButtonText;
-      }
-
-    }
-
+    );
   });
-
-});
+})();
 
 // =====================================
 // END OF AMP WEBSITE SCRIPT
