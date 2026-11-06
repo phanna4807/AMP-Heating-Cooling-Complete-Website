@@ -1,32 +1,46 @@
 
 /*
- AMP Heating & Cooling
- Navigation and service request forms
- Business phone: (630) 380-1017
+  AMP HEATING & COOLING
+  Service Request System
+
+  Website: https://www.7-amp.com
+  Email: ampservice586@gmail.com
+  Phone: (630) 380-1017
+
+  Form Provider: FormSubmit.co (FREE)
 */
 
-// Business contact information
-const AMP_FORM_RECIPIENT = "ampservice586@gmail.com";
-const AMP_PHONE = "(630) 380-1017";
-const AMP_PHONE_TEL = "6303801017";
+// =====================================
+// BUSINESS INFORMATION
+// =====================================
 
-// Customer confirmation message
+const AMP_FORM_RECIPIENT = "ampservice586@gmail.com";
+
+const AMP_PHONE = "(630) 380-1017";
+
+const AMP_PHONE_LINK = "6303801017";
+
+const AMP_FORM_ENDPOINT =
+  "https://formsubmit.co/" + AMP_FORM_RECIPIENT;
+
 const AMP_RESPONSE =
   "Thank you for contacting AMP Heating & Cooling! " +
   "We have received your service request. " +
-  "Our team will review your information and contact you " +
-  "to discuss scheduling and availability. " +
-  "This is not a confirmed appointment. " +
-  "For urgent HVAC service, call " + AMP_PHONE + ".";
+  "Our team will review your information and " +
+  "contact you to discuss scheduling. " +
+  "Your appointment is NOT confirmed yet. " +
+  "For urgent HVAC service, please call " +
+  AMP_PHONE + ".";
 
 
-// ------------------------------------
+// =====================================
 // MOBILE NAVIGATION
-// ------------------------------------
+// =====================================
 
 const menuToggle = document.querySelector(".menu-toggle");
 
 menuToggle?.addEventListener("click", () => {
+
   const nav = document.querySelector(".nav");
 
   if (!nav) return;
@@ -37,61 +51,54 @@ menuToggle?.addEventListener("click", () => {
     "aria-expanded",
     String(isOpen)
   );
+
 });
 
 
-// ------------------------------------
-// CHECK FORM CONFIGURATION
-// ------------------------------------
+// =====================================
+// ADD HIDDEN FORM FIELD
+// =====================================
 
-function isFormConfigured() {
-  const target = AMP_FORM_RECIPIENT.trim();
+function addHiddenField(form, name, value) {
 
-  return (
-    target.length > 0 &&
-    target !== "REPLACE_WITH_AMP_BUSINESS_EMAIL" &&
-    (
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target) ||
-      /^[a-zA-Z0-9_-]{12,}$/.test(target)
-    )
-  );
-}
-
-
-// ------------------------------------
-// INSERT HIDDEN FORM FIELDS
-// ------------------------------------
-
-function insertHidden(form, name, value) {
   let field = Array.from(
     form.querySelectorAll('input[type="hidden"]')
   ).find(input => input.name === name);
 
   if (!field) {
+
     field = document.createElement("input");
+
     field.type = "hidden";
+
     field.name = name;
+
     form.prepend(field);
+
   }
 
   field.value = value;
+
 }
 
 
-// ------------------------------------
-// FORMAT CUSTOMER REQUEST
-// ------------------------------------
+// =====================================
+// CREATE SERVICE REQUEST SUMMARY
+// =====================================
 
-function buildRequestSummary(form) {
-  const data = new FormData(form);
+function createRequestSummary(form) {
+
+  const formData = new FormData(form);
 
   const lines = [
-    "AMP Heating & Cooling",
-    "New Service Request",
+    "AMP HEATING & COOLING",
+    "NEW SERVICE REQUEST",
+    "--------------------------",
     ""
   ];
 
-  for (const [key, value] of data.entries()) {
+  for (const [key, value] of formData.entries()) {
+
     if (
       key.startsWith("_") ||
       key === "consent" ||
@@ -106,258 +113,235 @@ function buildRequestSummary(form) {
       .replace(/\b\w/g, letter => letter.toUpperCase());
 
     lines.push(label + ": " + value);
+
   }
+
+  lines.push("");
+  lines.push("Submitted from the AMP website.");
 
   return lines.join("\n");
+
 }
 
 
-// ------------------------------------
-// PREVIEW WHEN FORM IS UNCONFIGURED
-// ------------------------------------
-
-function previewRequest(form) {
-  const summary = buildRequestSummary(form);
-  const alert = form.querySelector(".alert");
-
-  if (alert) {
-    alert.className = "alert";
-    alert.style.display = "block";
-    alert.textContent =
-      "Email delivery is not configured. " +
-      "Your request has NOT been sent. " +
-      "Please call " + AMP_PHONE + " for service.";
-  }
-
-  let result = form.querySelector(".amp-preview-summary");
-
-  if (!result) {
-    result = document.createElement("div");
-    result.className = "amp-preview-summary";
-    result.style.cssText =
-      "margin-top:16px;display:grid;gap:10px";
-
-    form.appendChild(result);
-  }
-
-  result.replaceChildren();
-
-  const area = document.createElement("textarea");
-  area.readOnly = true;
-  area.rows = 7;
-  area.style.width = "100%";
-  area.setAttribute(
-    "aria-label",
-    "Request details to copy"
-  );
-  area.value = summary;
-
-  const copy = document.createElement("button");
-  copy.type = "button";
-  copy.className = "btn";
-  copy.textContent = "Copy request details";
-
-  copy.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(summary);
-      copy.textContent = "Copied!";
-    } catch (error) {
-      area.select();
-      try {
-        document.execCommand("copy");
-        copy.textContent = "Copied!";
-      } catch (_) {
-        copy.textContent = "Select and copy the text above";
-      }
-    }
-  });
-
-  result.append(area, copy);
-
-  alert?.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
-}
-
-
-// ------------------------------------
+// =====================================
 // BACKUP EMAIL OPTION
-// ------------------------------------
+// =====================================
 
-function addBackupEmailOption(form) {
-  const note = form.querySelector(".form-note");
+function addBackupEmail(form) {
 
-  if (!note || !isFormConfigured()) return;
+  // Avoid duplicate backup links.
+  if (form.querySelector(".amp-backup-email")) {
+    return;
+  }
 
   const wrapper = document.createElement("p");
-  wrapper.className = "form-note";
 
-  const description = document.createElement("span");
-  description.textContent =
-    "Having trouble sending your request? ";
+  wrapper.className = "form-note amp-backup-email";
 
-  const emailButton = document.createElement("a");
-  emailButton.className = "text-link";
-  emailButton.textContent = "Open email app instead";
+  wrapper.style.marginTop = "15px";
 
-  emailButton.href =
-    "mailto:" + AMP_FORM_RECIPIENT;
+  const text = document.createElement("span");
 
-  emailButton.addEventListener("click", event => {
+  text.textContent =
+    "Having trouble submitting your request? ";
+
+  const link = document.createElement("a");
+
+  link.textContent = "Send request by email instead";
+
+  link.href = "mailto:" + AMP_FORM_RECIPIENT;
+
+  link.style.fontWeight = "bold";
+
+  link.addEventListener("click", event => {
+
     if (!form.reportValidity()) {
+
       event.preventDefault();
+
       return;
+
     }
 
     const subject =
       "New AMP Heating & Cooling Service Request";
 
-    const body = buildRequestSummary(form);
+    const body = createRequestSummary(form);
 
-    emailButton.href =
+    link.href =
       "mailto:" + AMP_FORM_RECIPIENT +
       "?subject=" + encodeURIComponent(subject) +
       "&body=" + encodeURIComponent(body);
+
   });
 
-  const explanation = document.createElement("span");
-  explanation.textContent =
-    " This opens an email draft. " +
-    "You must send the email from your email app.";
-
-  wrapper.append(
-    description,
-    emailButton,
-    explanation
-  );
-
-  note.after(wrapper);
-}
-
-
-// ------------------------------------
-// CONFIGURE SERVICE REQUEST FORMS
-// ------------------------------------
-
-for (
-  const form of document.querySelectorAll(
-    "form[data-service-form]"
-  )
-) {
-  const configured = isFormConfigured();
-
-  const button = form.querySelector(
-    'button[type="submit"]'
-  );
+  wrapper.append(text, link);
 
   const note = form.querySelector(".form-note");
 
-  if (configured) {
-
-    // Configure FormSubmit
-    form.method = "POST";
-
-    form.action =
-      "https://formsubmit.co/" +
-      encodeURIComponent(
-        AMP_FORM_RECIPIENT.trim()
-      );
-
-    form.setAttribute(
-      "accept-charset",
-      "UTF-8"
-    );
-
-    insertHidden(
-      form,
-      "_subject",
-      "New AMP Heating & Cooling service request"
-    );
-
-    insertHidden(
-      form,
-      "_autoresponse",
-      AMP_RESPONSE
-    );
-
-    insertHidden(
-      form,
-      "_template",
-      "table"
-    );
-
-    // Keep FormSubmit's CAPTCHA enabled.
-
-    const thankYou = new URL(
-      "thank-you.html",
-      window.location.href
-    );
-
-    if (
-      thankYou.protocol === "https:" ||
-      thankYou.protocol === "http:"
-    ) {
-      insertHidden(
-        form,
-        "_next",
-        thankYou.href
-      );
-    }
-
-    if (button) {
-      button.textContent =
-        "Send Service Request →";
-    }
-
-    if (note) {
-      note.innerHTML =
-        "After your request is processed, " +
-        "you may receive an email confirmation. " +
-        "This is not a confirmed appointment. " +
-        "For urgent service, call " +
-        '<a href="tel:' + AMP_PHONE_TEL + '">' +
-        AMP_PHONE +
-        "</a>.";
-    }
-
-    // Add another way to contact AMP
-    addBackupEmailOption(form);
-
+  if (note) {
+    note.after(wrapper);
   } else {
-
-    if (button) {
-      button.textContent =
-        "Prepare request details →";
-    }
-
-    if (note) {
-      note.innerHTML =
-        "Online email delivery is not configured. " +
-        "Please call " +
-        '<a href="tel:' + AMP_PHONE_TEL + '">' +
-        AMP_PHONE +
-        "</a> for service.";
-    }
+    form.appendChild(wrapper);
   }
 
-  // Handle form submission
+}
+
+
+// =====================================
+// CONFIGURE SERVICE REQUEST FORMS
+// =====================================
+
+const serviceForms = document.querySelectorAll(
+  "form[data-service-form]"
+);
+
+serviceForms.forEach(form => {
+
+  // FormSubmit requires a normal POST form.
+  form.method = "POST";
+
+  form.action = AMP_FORM_ENDPOINT;
+
+  form.setAttribute(
+    "accept-charset",
+    "UTF-8"
+  );
+
+  // -----------------------------------
+  // EMAIL SUBJECT
+  // -----------------------------------
+
+  addHiddenField(
+    form,
+    "_subject",
+    "NEW AMP Heating & Cooling Service Request"
+  );
+
+  // -----------------------------------
+  // CUSTOMER AUTO RESPONSE
+  // -----------------------------------
+
+  addHiddenField(
+    form,
+    "_autoresponse",
+    AMP_RESPONSE
+  );
+
+  // -----------------------------------
+  // EMAIL LAYOUT
+  // -----------------------------------
+
+  addHiddenField(
+    form,
+    "_template",
+    "table"
+  );
+
+  // -----------------------------------
+  // WEBSITE SOURCE
+  // -----------------------------------
+
+  addHiddenField(
+    form,
+    "_url",
+    window.location.href
+  );
+
+  // -----------------------------------
+  // THANK YOU PAGE
+  // -----------------------------------
+
+  const thankYouURL = new URL(
+    "thank-you.html",
+    window.location.href
+  );
+
+  addHiddenField(
+    form,
+    "_next",
+    thankYouURL.href
+  );
+
+  // -----------------------------------
+  // CAPTCHA PROTECTION
+  // -----------------------------------
+
+  // Keep FormSubmit CAPTCHA enabled.
+  // Do not set _captcha to false.
+
+  // -----------------------------------
+  // SUBMIT BUTTON
+  // -----------------------------------
+
+  const submitButton = form.querySelector(
+    'button[type="submit"]'
+  );
+
+  if (submitButton) {
+
+    submitButton.textContent =
+      "Send Service Request →";
+
+  }
+
+  // -----------------------------------
+  // CUSTOMER INFORMATION
+  // -----------------------------------
+
+  const formNote = form.querySelector(
+    ".form-note"
+  );
+
+  if (formNote) {
+
+    formNote.innerHTML =
+      "After successfully submitting your request, " +
+      "you may receive an email confirmation. " +
+      "This does not confirm an appointment. " +
+      "Our team will contact you about scheduling. " +
+      "For urgent service, call " +
+      '<a href="tel:' + AMP_PHONE_LINK + '">' +
+      AMP_PHONE +
+      "</a>.";
+
+  }
+
+  // -----------------------------------
+  // BACKUP EMAIL
+  // -----------------------------------
+
+  addBackupEmail(form);
+
+  // -----------------------------------
+  // FORM SUBMISSION
+  // -----------------------------------
+
   form.addEventListener("submit", event => {
 
     if (!form.reportValidity()) {
+
       event.preventDefault();
+
       return;
+
     }
 
-    if (!configured) {
-      event.preventDefault();
-      previewRequest(form);
-      return;
-    }
+    // Let the browser submit directly
+    // to FormSubmit using POST.
+    //
+    // FormSubmit handles CAPTCHA,
+    // email delivery, and redirection.
+    //
+    // Do not claim success before the
+    // service processes the request.
 
-    // Native POST request to FormSubmit.
-    // Do not display success until the
-    // provider processes the submission.
   });
-}
+
+});
+
+// =====================================
+// END OF AMP FORM SYSTEM
+// =====================================
 
